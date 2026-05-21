@@ -1,6 +1,8 @@
 package com.oriole.wisepen.resource.repository;
 
 import com.oriole.wisepen.resource.domain.entity.ResourceOperationLogEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,4 +11,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ResourceOperationLogRepository extends MongoRepository<ResourceOperationLogEntity, String> {
+
+    Page<ResourceOperationLogEntity> findByUserId(Long userId, Pageable pageable);
+
+    Page<ResourceOperationLogEntity> findByUserIdAndResourceId(Long userId, String resourceId, Pageable pageable);
+
+    Page<ResourceOperationLogEntity> findByResourceId(String resourceId, Pageable pageable);
 }

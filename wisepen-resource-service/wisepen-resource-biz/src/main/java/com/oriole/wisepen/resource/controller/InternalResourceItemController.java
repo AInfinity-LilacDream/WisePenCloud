@@ -1,9 +1,14 @@
 package com.oriole.wisepen.resource.controller;
 
+import com.oriole.wisepen.common.core.domain.PageR;
 import com.oriole.wisepen.common.core.domain.R;
+import com.oriole.wisepen.common.core.domain.enums.IdentityType;
+import com.oriole.wisepen.common.core.domain.enums.list.SortDirectionEnum;
+import com.oriole.wisepen.common.security.annotation.CheckRole;
 import com.oriole.wisepen.resource.domain.dto.*;
 import com.oriole.wisepen.resource.domain.dto.req.AppendResourceOperationLogRequest;
 import com.oriole.wisepen.resource.domain.dto.res.ResourceItemResponse;
+import com.oriole.wisepen.resource.domain.dto.res.ResourceOperationLogResponse;
 import com.oriole.wisepen.resource.feign.RemoteResourceService;
 import com.oriole.wisepen.resource.service.IGroupResService;
 import com.oriole.wisepen.resource.service.IResourceService;
@@ -61,6 +66,18 @@ public class InternalResourceItemController implements RemoteResourceService {
     public R<Void> appendOperationLog(@Validated @RequestBody AppendResourceOperationLogRequest dto) {
         resourceService.appendResourceOperationLog(dto);
         return R.ok();
+    }
+
+    /**
+     * 全库操作流水分页；仅平台管理员（身份由网关透传），仍建议在网关对 internal 路由做网络隔离。
+     */
+    @CheckRole(IdentityType.ADMIN)
+    @GetMapping("/pageAllOperationLogs")
+    public R<PageR<ResourceOperationLogResponse>> pageAllOperationLogs(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "sortDir", required = false) SortDirectionEnum sortDir) {
+        return R.ok(resourceService.listAllResourceOperationLogs(page, size, sortDir));
     }
 
 }

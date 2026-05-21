@@ -5,14 +5,17 @@ import com.oriole.wisepen.common.core.context.SecurityContextHolder;
 import com.oriole.wisepen.common.core.domain.PageR;
 import com.oriole.wisepen.common.core.domain.R;
 import com.oriole.wisepen.common.core.domain.enums.BusinessType;
+import com.oriole.wisepen.common.core.domain.enums.IdentityType;
 import com.oriole.wisepen.common.core.domain.enums.GroupRoleType;
 import com.oriole.wisepen.common.core.domain.enums.list.QueryLogicEnum;
 import com.oriole.wisepen.common.core.domain.enums.list.SortDirectionEnum;
 import com.oriole.wisepen.common.log.annotation.Log;
 import com.oriole.wisepen.common.security.annotation.CheckLogin;
+import com.oriole.wisepen.common.security.annotation.CheckRole;
 import com.oriole.wisepen.resource.constant.ResourceConstants;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateActionPermissionRequest;
 import com.oriole.wisepen.resource.domain.dto.res.ResourceItemResponse;
+import com.oriole.wisepen.resource.domain.dto.res.ResourceOperationLogResponse;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceRenameRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateTagsRequest;
 import com.oriole.wisepen.resource.enums.ResourceSortBy;
@@ -134,6 +137,40 @@ public class ResourceItemController {
                 sortBy,
                 sortDir
         );
+        return R.ok(result);
+    }
+
+    @Operation(summary = "按用户查询资源操作流水",
+            description = "仅平台管理员可用，按操作时间分页。")
+    @CheckRole(IdentityType.ADMIN)
+    @GetMapping("/operationLogs/byCurrentUser")
+    public R<PageR<ResourceOperationLogResponse>> listMyResourceOperationLogs(
+            @Parameter(description = "可选；要审计的目标用户 ID，缺省为当前登录管理员本人")
+            @RequestParam(value = "userId", required = false) Long userId,
+            @Parameter(description = "可选；不传或留空表示不限定资源")
+            @RequestParam(value = "resourceId", required = false) String resourceId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @Parameter(description = "按 operationTime 排序")
+            @RequestParam(value = "sortDir", defaultValue = "ASC") SortDirectionEnum sortDir) {
+        Long subjectUserId = userId != null ? userId : SecurityContextHolder.getUserId();
+        PageR<ResourceOperationLogResponse> result = resourceService.listResourceOperationLogsForCurrentUser(
+                subjectUserId, resourceId, page, size, sortDir, false);
+        return R.ok(result);
+    }
+
+    @Operation(summary = "按资源查操作演变流水",
+            description = "仅平台管理员可用，按操作时间分页。")
+    @CheckRole(IdentityType.ADMIN)
+    @GetMapping("/operationLogs/byResource")
+    public R<PageR<ResourceOperationLogResponse>> listResourceOperationLogsByResource(
+            @RequestParam String resourceId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @Parameter(description = "按 operationTime 排序")
+            @RequestParam(value = "sortDir", defaultValue = "ASC") SortDirectionEnum sortDir) {
+        PageR<ResourceOperationLogResponse> result = resourceService.listResourceOperationLogsForResource(
+                SecurityContextHolder.getUserId(), resourceId, page, size, sortDir, false);
         return R.ok(result);
     }
 }

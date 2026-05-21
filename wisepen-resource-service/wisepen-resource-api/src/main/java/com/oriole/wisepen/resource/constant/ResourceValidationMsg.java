@@ -24,8 +24,8 @@ public interface ResourceValidationMsg {
 
     String FILE_ORG_LOGIC_NOT_NULL = "资源组织模式不能为空";
 
-    // 资源操作流水（appendOperationLog）
+    // 资源操作流水
     String RESOURCE_OPERATION_DOMAIN_NOT_NULL = "资源操作日志业务域不能为空";
     String RESOURCE_OPERATION_TYPE_NOT_BLANK = "资源操作类型不能为空";
-    String RESOURCE_OPERATION_TYPE_INVALID = "资源操作类型必须是已定义的域内短码（如 CREATE、DELETE、TAG_UPDATE）";
+    String RESOURCE_OPERATION_TYPE_INVALID = "资源操作类型必须是已定义的域内短码";
 }

@@ -10,6 +10,7 @@ import com.oriole.wisepen.resource.domain.dto.req.ResourceRenameRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateActionPermissionRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateTagsRequest;
 import com.oriole.wisepen.resource.domain.dto.res.ResourceItemResponse;
+import com.oriole.wisepen.resource.domain.dto.res.ResourceOperationLogResponse;
 import com.oriole.wisepen.resource.enums.ResourceSortBy;
 
 import java.util.List;
@@ -24,10 +25,6 @@ public interface IResourceService {
 
     void updateResourceTags(ResourceUpdateTagsRequest req);
 
-    /**
-     * 写入「用户修改资源标签」操作流水（{@code TAG_UPDATE}）。仅应由用户 HTTP 入口在 {@link #updateResourceTags} 成功后调用；
-     * 领域编排（如创建资源时内部绑标签）不应调用。
-     */
     void recordTagUpdateOperationLog(String resourceId, String groupId);
 
     void updateResourceActionPermission(ResourceUpdateActionPermissionRequest req);
@@ -61,6 +58,25 @@ public interface IResourceService {
 
     void stripGroupPermission(List<String> trashedTagIds);
 
-    /** 追加一条资源操作流水（Mongo {@code wisepen_resource_operation_logs}） */
     void appendResourceOperationLog(AppendResourceOperationLogRequest req);
+
+    /**
+     * @param enforceResourceViewCheck 为 true 时，涉及 resourceId 会走 {@link #getResourceInfo} 做 VIEW 校验；
+     *                                   入口已用 {@code @CheckRole(ADMIN)} 鉴权的管理员接口应传 {@code false}，避免业务层依赖安全上下文。
+     */
+    PageR<ResourceOperationLogResponse> listResourceOperationLogsForCurrentUser(Long subjectUserId,
+                                                                                String resourceId, int page, int size,
+                                                                                SortDirectionEnum sortDir,
+                                                                                boolean enforceResourceViewCheck);
+
+    /**
+     * @param enforceResourceViewCheck 为 true 时先 {@link #getResourceInfo}；管理员入口已鉴权时传 {@code false}。
+     */
+    PageR<ResourceOperationLogResponse> listResourceOperationLogsForResource(Long currentUserId,
+                                                                             String resourceId, int page, int size,
+                                                                             SortDirectionEnum sortDir,
+                                                                             boolean enforceResourceViewCheck);
+
+    //全部资源操作历史
+    PageR<ResourceOperationLogResponse> listAllResourceOperationLogs(int page, int size, SortDirectionEnum sortDir);
 }
