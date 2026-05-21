@@ -37,7 +37,7 @@ public class InternalResourceItemController implements RemoteResourceService {
     }
 
     @PostMapping("/getResourceInfo")
-    public R<ResourceItemResponse> getResourceInfo(ResourceInfoGetReqDTO dto) {
+    public R<ResourceItemResponse> getResourceInfo(@Validated @RequestBody ResourceInfoGetReqDTO dto) {
         ResourceItemResponse response = resourceService.getResourceInfo(dto);
         return R.ok(response);
     }
