@@ -58,7 +58,7 @@ public class InternalResourceItemController implements RemoteResourceService {
     }
 
     @PostMapping("/appendOperationLog")
-    public R<Void> appendOperationLog(@RequestBody AppendResourceOperationLogRequest dto) {
+    public R<Void> appendOperationLog(@Validated @RequestBody AppendResourceOperationLogRequest dto) {
         resourceService.appendResourceOperationLog(dto);
         return R.ok();
     }

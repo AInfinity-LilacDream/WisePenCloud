@@ -22,6 +22,7 @@ import com.oriole.wisepen.resource.domain.entity.ResourceItemEntity;
 import com.oriole.wisepen.resource.domain.entity.ResourceOperationLogEntity;
 import com.oriole.wisepen.resource.domain.entity.TagEntity;
 import com.oriole.wisepen.resource.enums.ResourceOperationDomain;
+import com.oriole.wisepen.resource.enums.ResourceOperationType;
 import com.oriole.wisepen.resource.enums.ResourceAccessRole;
 import com.oriole.wisepen.resource.enums.ResourceAction;
 import com.oriole.wisepen.resource.enums.ResourceSortBy;
@@ -146,7 +147,7 @@ public class ResourceServiceImpl implements IResourceService {
         resourceItemRepository.save(entity);
         log.info("resource renamed resourceId={} oldName={} newName={}",
                 entity.getResourceId(), oldName, req.getNewName());
-        appendResourceItemOperationLog(entity, "RENAME", null, req.getNewName(),
+        appendResourceItemOperationLog(entity, ResourceOperationType.RENAME, null, req.getNewName(),
                 JSONUtil.createObj().set("oldName", oldName).set("newName", req.getNewName()).toString());
     }
 
@@ -247,7 +248,7 @@ public class ResourceServiceImpl implements IResourceService {
     @Override
     public void recordTagUpdateOperationLog(String resourceId, String groupId) {
         resourceItemRepository.findById(resourceId).ifPresent(entity ->
-                appendResourceItemOperationLog(entity, "TAG_UPDATE", null, null,
+                appendResourceItemOperationLog(entity, ResourceOperationType.TAG_UPDATE, null, null,
                         JSONUtil.createObj().set("groupId", groupId).toString()));
     }
 
@@ -278,7 +279,7 @@ public class ResourceServiceImpl implements IResourceService {
                 entity.getOverrideGrantedActionsMask() != null,
                 entity.getSpecifiedUsersGrantedActionsMask() == null ? 0 : entity.getSpecifiedUsersGrantedActionsMask().size());
 
-        appendResourceItemOperationLog(entity, "PERMISSION_UPDATE", null, null, null);
+        appendResourceItemOperationLog(entity, ResourceOperationType.PERMISSION_UPDATE, null, null, null);
 
         // 保存资源级权限覆盖后，触发重算
         eventPublisher.publishAclRecalculateEvent(entity.getResourceId(), "RESOURCE_ACTION_PERMISSION_CHANGED");
@@ -502,7 +503,7 @@ public class ResourceServiceImpl implements IResourceService {
         } catch (NumberFormatException ex) {
             createUserId = resolveActorUserId(dto.getOwnerId());
         }
-        appendResourceItemOperationLog(entity, "CREATE", createUserId, null, null);
+        appendResourceItemOperationLog(entity, ResourceOperationType.CREATE, createUserId, null, null);
         return entity.getResourceId();
     }
 
@@ -516,7 +517,7 @@ public class ResourceServiceImpl implements IResourceService {
             return;
         }
         for (ResourceItemEntity entity : entities) {
-            appendResourceItemOperationLog(entity, "DELETE", null, null,
+            appendResourceItemOperationLog(entity, ResourceOperationType.DELETE, null, null,
                     JSONUtil.createObj().set("mode", "soft").toString());
             entity.setDeletedAt(LocalDateTime.now());
             mongoTemplate.save(entity, RESOURCE_TRASH_COLLECTION); // 插入到回收集合（用于审计）中
@@ -542,7 +543,7 @@ public class ResourceServiceImpl implements IResourceService {
         if (expiredResources.isEmpty()) return;
 
         for (ResourceItemEntity entity : expiredResources) {
-            appendResourceItemOperationLog(entity, "PURGE", null, null, null);
+            appendResourceItemOperationLog(entity, ResourceOperationType.PURGE, null, null, null);
         }
 
         long deletedCount = mongoTemplate.remove(query, RESOURCE_TRASH_COLLECTION).getDeletedCount();
@@ -560,7 +561,7 @@ public class ResourceServiceImpl implements IResourceService {
             BeanUtil.copyProperties(dto, entity, CopyOptions.create().ignoreNullValue());
             resourceItemRepository.save(entity);
             log.info("resourceAttributes updated resourceId={}", entity.getResourceId());
-            appendResourceItemOperationLog(entity, "META_UPDATE", null, null, null);
+            appendResourceItemOperationLog(entity, ResourceOperationType.META_UPDATE, null, null, null);
         }, () -> log.warn("resourceAttributes update skipped resourceId={}", dto.getResourceId()));
     }
 
@@ -597,7 +598,7 @@ public class ResourceServiceImpl implements IResourceService {
         // 如果是路径(FOLDER Tag)被彻底销毁，触发资源的软删除
         if (Boolean.TRUE.equals(isPathTag)) {
             for (ResourceItemEntity entity : affectedBinds) {
-                appendResourceItemOperationLog(entity, "DELETE", null, null,
+                appendResourceItemOperationLog(entity, ResourceOperationType.DELETE, null, null,
                         JSONUtil.createObj().set("mode", "soft").set("reason", "path_tag_deleted").toString());
                 // 插入到回收集合（用于审计）中
                 entity.setDeletedAt(LocalDateTime.now());
@@ -863,18 +864,18 @@ public class ResourceServiceImpl implements IResourceService {
     }
 
     /**
-     * 基于资源实体组装并写入操作流水（domain / 默认操作者 / 默认名称快照）。
+     * 基于资源实体组装并写入操作流水。
      *
      * @param actorUserId          非空则作为操作者；为空则按 {@link #resolveActorUserId(String)} 解析
      * @param resourceNameSnapshot 非空则作为名称快照；为空则用实体当前名称
      * @param detail               可为 null
      */
-    private void appendResourceItemOperationLog(ResourceItemEntity entity, String operationType,
+    private void appendResourceItemOperationLog(ResourceItemEntity entity, ResourceOperationType operationType,
                                                 Long actorUserId, String resourceNameSnapshot, String detail) {
         AppendResourceOperationLogRequest op = new AppendResourceOperationLogRequest();
         op.setResourceId(entity.getResourceId());
         op.setDomain(domainOf(entity.getResourceType()));
-        op.setOperationType(operationType);
+        op.setOperationType(operationType.name());
         op.setUserId(actorUserId != null ? actorUserId : resolveActorUserId(entity.getOwnerId()));
         op.setResourceName(resourceNameSnapshot != null ? resourceNameSnapshot : entity.getResourceName());
         op.setDetail(detail);
