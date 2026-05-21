@@ -5,6 +5,7 @@ import com.oriole.wisepen.common.core.domain.enums.GroupRoleType;
 import com.oriole.wisepen.common.core.domain.enums.list.QueryLogicEnum;
 import com.oriole.wisepen.common.core.domain.enums.list.SortDirectionEnum;
 import com.oriole.wisepen.resource.domain.dto.*;
+import com.oriole.wisepen.resource.domain.dto.req.AppendResourceOperationLogRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceRenameRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateActionPermissionRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateTagsRequest;
@@ -22,6 +23,12 @@ public interface IResourceService {
     void renameResource(ResourceRenameRequest req);
 
     void updateResourceTags(ResourceUpdateTagsRequest req);
+
+    /**
+     * 写入「用户修改资源标签」操作流水（{@code TAG_UPDATE}）。仅应由用户 HTTP 入口在 {@link #updateResourceTags} 成功后调用；
+     * 领域编排（如创建资源时内部绑标签）不应调用。
+     */
+    void recordTagUpdateOperationLog(String resourceId, String groupId);
 
     void updateResourceActionPermission(ResourceUpdateActionPermissionRequest req);
 
@@ -53,4 +60,7 @@ public interface IResourceService {
     ResourceCheckPermissionResDTO checkPermission(ResourceCheckPermissionReqDTO dto);
 
     void stripGroupPermission(List<String> trashedTagIds);
+
+    /** 追加一条资源操作流水（Mongo {@code wisepen_resource_operation_logs}） */
+    void appendResourceOperationLog(AppendResourceOperationLogRequest req);
 }

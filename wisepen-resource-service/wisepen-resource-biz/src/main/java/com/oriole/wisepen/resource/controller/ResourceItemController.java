@@ -77,6 +77,7 @@ public class ResourceItemController {
             }
         }
         resourceService.updateResourceTags(req);
+        resourceService.recordTagUpdateOperationLog(req.getResourceId(), req.getGroupId());
         return R.ok();
     }
 

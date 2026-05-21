@@ -1,6 +1,7 @@
 package com.oriole.wisepen.resource.feign;
 
 import com.oriole.wisepen.resource.domain.dto.*;
+import com.oriole.wisepen.resource.domain.dto.req.AppendResourceOperationLogRequest;
 import com.oriole.wisepen.resource.domain.dto.res.ResourceItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,8 +10,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Map;
 
 /**
  * 提供给其他微服务的权限 RPC 接口
@@ -38,5 +37,9 @@ public interface RemoteResourceService {
     @Operation(summary = "解散小组", description = "软删除小组下的 Tag 树与资源配置，30 天后由定时任务彻底清理")
     @PostMapping("/internal/resource/dissolveGroup")
     R<Void> dissolveGroup(@RequestParam("groupId") Long groupId);
+
+    @Operation(summary = "追加资源操作流水", description = "写入用户对文档/笔记相关资源的操作历史")
+    @PostMapping("/internal/resource/appendOperationLog")
+    R<Void> appendOperationLog(@RequestBody AppendResourceOperationLogRequest dto);
 
 }

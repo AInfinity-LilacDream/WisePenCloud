@@ -2,6 +2,7 @@ package com.oriole.wisepen.resource.controller;
 
 import com.oriole.wisepen.common.core.domain.R;
 import com.oriole.wisepen.resource.domain.dto.*;
+import com.oriole.wisepen.resource.domain.dto.req.AppendResourceOperationLogRequest;
 import com.oriole.wisepen.resource.domain.dto.res.ResourceItemResponse;
 import com.oriole.wisepen.resource.feign.RemoteResourceService;
 import com.oriole.wisepen.resource.service.IGroupResService;
@@ -53,6 +54,12 @@ public class InternalResourceItemController implements RemoteResourceService {
     public R<Void> dissolveGroup(@RequestParam("groupId") Long groupId) {
         tagService.softRemoveAllTagByGroupId(groupId.toString());
         groupResService.softRemoveGroupResConfigByGroupId(groupId.toString());
+        return R.ok();
+    }
+
+    @PostMapping("/appendOperationLog")
+    public R<Void> appendOperationLog(@RequestBody AppendResourceOperationLogRequest dto) {
+        resourceService.appendResourceOperationLog(dto);
         return R.ok();
     }
 
