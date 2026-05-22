@@ -140,37 +140,21 @@ public class ResourceItemController {
         return R.ok(result);
     }
 
-    @Operation(summary = "按用户查询资源操作流水",
-            description = "仅平台管理员可用，按操作时间分页。")
+    @Operation(summary = "资源操作流水分页查询",
+            description = "仅平台管理员可用")
     @CheckRole(IdentityType.ADMIN)
-    @GetMapping("/operationLogs/byCurrentUser")
-    public R<PageR<ResourceOperationLogResponse>> listMyResourceOperationLogs(
-            @Parameter(description = "可选；要审计的目标用户 ID，缺省为当前登录管理员本人")
+    @GetMapping("/operationLogs")
+    public R<PageR<ResourceOperationLogResponse>> listResourceOperationLogs(
+            @Parameter(description = "按操作者用户 ID 筛选，不传表示不限定用户")
             @RequestParam(value = "userId", required = false) Long userId,
-            @Parameter(description = "可选；不传或留空表示不限定资源")
+            @Parameter(description = "按资源 ID 筛选，不传表示不限定资源")
             @RequestParam(value = "resourceId", required = false) String resourceId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @Parameter(description = "按 operationTime 排序")
             @RequestParam(value = "sortDir", defaultValue = "ASC") SortDirectionEnum sortDir) {
-        Long subjectUserId = userId != null ? userId : SecurityContextHolder.getUserId();
-        PageR<ResourceOperationLogResponse> result = resourceService.listResourceOperationLogsForCurrentUser(
-                subjectUserId, resourceId, page, size, sortDir, false);
-        return R.ok(result);
-    }
-
-    @Operation(summary = "按资源查操作演变流水",
-            description = "仅平台管理员可用，按操作时间分页。")
-    @CheckRole(IdentityType.ADMIN)
-    @GetMapping("/operationLogs/byResource")
-    public R<PageR<ResourceOperationLogResponse>> listResourceOperationLogsByResource(
-            @RequestParam String resourceId,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            @Parameter(description = "按 operationTime 排序")
-            @RequestParam(value = "sortDir", defaultValue = "ASC") SortDirectionEnum sortDir) {
-        PageR<ResourceOperationLogResponse> result = resourceService.listResourceOperationLogsForResource(
-                SecurityContextHolder.getUserId(), resourceId, page, size, sortDir, false);
+        PageR<ResourceOperationLogResponse> result = resourceService.listResourceOperationLogs(
+                userId, resourceId, page, size, sortDir, false, null);
         return R.ok(result);
     }
 }

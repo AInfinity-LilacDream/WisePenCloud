@@ -822,61 +822,34 @@ public class ResourceServiceImpl implements IResourceService {
     }
 
     @Override
-    public PageR<ResourceOperationLogResponse> listResourceOperationLogsForCurrentUser(Long subjectUserId,
-                                                                                         String resourceId, int page, int size,
-                                                                                         SortDirectionEnum sortDir,
-                                                                                         boolean enforceResourceViewCheck) {
-        Objects.requireNonNull(subjectUserId, "subjectUserId");
+    public PageR<ResourceOperationLogResponse> listResourceOperationLogs(Long filterUserId,
+                                                                          String filterResourceId,
+                                                                          int page, int size, SortDirectionEnum sortDir,
+                                                                          boolean enforceResourceViewCheck,
+                                                                          Long aclViewerUserId) {
         int p = Math.max(1, page);
         int s = size <= 0 ? 20 : Math.min(size, ResourceConstants.RESOURCE_OPERATION_LOG_MAX_PAGE_SIZE);
         Pageable pageable = buildOperationLogPageable(p, s, sortDir);
 
-        Page<ResourceOperationLogEntity> entityPage;
-        if (StringUtils.hasText(resourceId)) {
-            if (enforceResourceViewCheck) {
-                getResourceInfo(ResourceInfoGetReqDTO.builder()
-                        .resourceId(resourceId)
-                        .userId(subjectUserId)
-                        .groupRoles(SecurityContextHolder.getGroupRoleMap())
-                        .build());
-            }
-            entityPage = resourceOperationLogRepository.findByUserIdAndResourceId(subjectUserId, resourceId, pageable);
-        } else {
-            entityPage = resourceOperationLogRepository.findByUserId(subjectUserId, pageable);
-        }
-        return toOperationLogPageR(entityPage, p, s);
-    }
-
-    @Override
-    public PageR<ResourceOperationLogResponse> listResourceOperationLogsForResource(Long currentUserId,
-                                                                                      String resourceId, int page, int size,
-                                                                                      SortDirectionEnum sortDir,
-                                                                                      boolean enforceResourceViewCheck) {
-        Objects.requireNonNull(currentUserId, "currentUserId");
-        if (!StringUtils.hasText(resourceId)) {
-            throw new ServiceException(ResourceError.RESOURCE_NOT_FOUND);
-        }
-        int p = Math.max(1, page);
-        int s = size <= 0 ? 20 : Math.min(size, ResourceConstants.RESOURCE_OPERATION_LOG_MAX_PAGE_SIZE);
-        Pageable pageable = buildOperationLogPageable(p, s, sortDir);
-
-        if (enforceResourceViewCheck) {
+        if (enforceResourceViewCheck && StringUtils.hasText(filterResourceId)) {
+            Objects.requireNonNull(aclViewerUserId, "aclViewerUserId");
             getResourceInfo(ResourceInfoGetReqDTO.builder()
-                    .resourceId(resourceId)
-                    .userId(currentUserId)
+                    .resourceId(filterResourceId)
+                    .userId(aclViewerUserId)
                     .groupRoles(SecurityContextHolder.getGroupRoleMap())
                     .build());
         }
-        Page<ResourceOperationLogEntity> entityPage = resourceOperationLogRepository.findByResourceId(resourceId, pageable);
-        return toOperationLogPageR(entityPage, p, s);
-    }
 
-    @Override
-    public PageR<ResourceOperationLogResponse> listAllResourceOperationLogs(int page, int size, SortDirectionEnum sortDir) {
-        int p = Math.max(1, page);
-        int s = size <= 0 ? 20 : Math.min(size, ResourceConstants.RESOURCE_OPERATION_LOG_MAX_PAGE_SIZE);
-        Pageable pageable = buildOperationLogPageable(p, s, sortDir);
-        Page<ResourceOperationLogEntity> entityPage = resourceOperationLogRepository.findAll(pageable);
+        Page<ResourceOperationLogEntity> entityPage;
+        if (filterUserId != null && StringUtils.hasText(filterResourceId)) {
+            entityPage = resourceOperationLogRepository.findByUserIdAndResourceId(filterUserId, filterResourceId, pageable);
+        } else if (filterUserId != null) {
+            entityPage = resourceOperationLogRepository.findByUserId(filterUserId, pageable);
+        } else if (StringUtils.hasText(filterResourceId)) {
+            entityPage = resourceOperationLogRepository.findByResourceId(filterResourceId, pageable);
+        } else {
+            entityPage = resourceOperationLogRepository.findAll(pageable);
+        }
         return toOperationLogPageR(entityPage, p, s);
     }
 

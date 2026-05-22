@@ -69,7 +69,7 @@ public class InternalResourceItemController implements RemoteResourceService {
     }
 
     /**
-     * 全库操作流水分页；仅平台管理员（身份由网关透传），仍建议在网关对 internal 路由做网络隔离。
+     * 兼容 Feign：全库分页，等价于 {@code GET /resource/item/operationLogs} 不传 userId、resourceId。
      */
     @CheckRole(IdentityType.ADMIN)
     @GetMapping("/pageAllOperationLogs")
@@ -77,7 +77,7 @@ public class InternalResourceItemController implements RemoteResourceService {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "sortDir", required = false) SortDirectionEnum sortDir) {
-        return R.ok(resourceService.listAllResourceOperationLogs(page, size, sortDir));
+        return R.ok(resourceService.listResourceOperationLogs(null, null, page, size, sortDir, false, null));
     }
 
 }

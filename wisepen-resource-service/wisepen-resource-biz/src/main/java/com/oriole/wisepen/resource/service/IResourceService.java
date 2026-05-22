@@ -60,23 +60,10 @@ public interface IResourceService {
 
     void appendResourceOperationLog(AppendResourceOperationLogRequest req);
 
-    /**
-     * @param enforceResourceViewCheck 为 true 时，涉及 resourceId 会走 {@link #getResourceInfo} 做 VIEW 校验；
-     *                                   入口已用 {@code @CheckRole(ADMIN)} 鉴权的管理员接口应传 {@code false}，避免业务层依赖安全上下文。
-     */
-    PageR<ResourceOperationLogResponse> listResourceOperationLogsForCurrentUser(Long subjectUserId,
-                                                                                String resourceId, int page, int size,
-                                                                                SortDirectionEnum sortDir,
-                                                                                boolean enforceResourceViewCheck);
-
-    /**
-     * @param enforceResourceViewCheck 为 true 时先 {@link #getResourceInfo}；管理员入口已鉴权时传 {@code false}。
-     */
-    PageR<ResourceOperationLogResponse> listResourceOperationLogsForResource(Long currentUserId,
-                                                                             String resourceId, int page, int size,
-                                                                             SortDirectionEnum sortDir,
-                                                                             boolean enforceResourceViewCheck);
-
-    //全部资源操作历史
-    PageR<ResourceOperationLogResponse> listAllResourceOperationLogs(int page, int size, SortDirectionEnum sortDir);
+    // 资源操作流水分页：可按「操作者用户」「资源」两个维度组合筛选
+    PageR<ResourceOperationLogResponse> listResourceOperationLogs(Long filterUserId,
+                                                                   String filterResourceId,
+                                                                   int page, int size, SortDirectionEnum sortDir,
+                                                                   boolean enforceResourceViewCheck,
+                                                                   Long aclViewerUserId);
 }

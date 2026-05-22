@@ -46,7 +46,7 @@ public interface RemoteResourceService {
     @PostMapping("/internal/resource/appendOperationLog")
     R<Void> appendOperationLog(@RequestBody AppendResourceOperationLogRequest dto);
 
-    @Operation(summary = "全库操作流水分页", description = "仅平台管理员；须携带管理员登录态（网关透传身份）。不做用户/资源数据鉴权，仍建议对 internal 路由做网络隔离")
+    @Operation(summary = "全库操作流水分页", description = "获取分页资源操作记录")
     @GetMapping("/internal/resource/pageAllOperationLogs")
     R<PageR<ResourceOperationLogResponse>> pageAllOperationLogs(
             @RequestParam(value = "page", defaultValue = "1") int page,

@@ -18,6 +18,5 @@ public class ResourceOperationLogResponse {
     private Long userId;
     private LocalDateTime operationTime;
     private String resourceName;
-    /** 扩展 JSON 字符串 */
     private String detail;
 }
