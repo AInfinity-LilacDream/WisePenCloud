@@ -27,7 +27,7 @@ public class ResourceInteractionController {
 
     @Operation(summary = "获取指定用户对某资源的交互状态", description = "获取指定用户对某资源的交互状态")
     @GetMapping("/getResourceUserInteractionRecord")
-    public R<ResourceUserInteractionRecordResponse> getResourceUserInteractionRecord(@RequestParam String resourceId) {
+    public R<ResourceUserInteractionRecordResponse> getResourceUserInteractionRecord(@RequestParam("resourceId") String resourceId) {
         String userId = SecurityContextHolder.getUserId().toString();
         return R.ok(resourceInteractionService.getResourceUserInteractionInfo(resourceId, userId));
     }

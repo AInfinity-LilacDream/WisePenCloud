@@ -3,7 +3,6 @@ package com.oriole.wisepen.common.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.oriole.wisepen.common.web.interceptor.FeignRequestInterceptor;
 import feign.RequestInterceptor;
 import feign.codec.Decoder;

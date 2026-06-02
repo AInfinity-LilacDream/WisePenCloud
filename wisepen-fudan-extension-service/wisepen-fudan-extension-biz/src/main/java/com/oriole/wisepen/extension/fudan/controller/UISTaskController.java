@@ -16,7 +16,7 @@ public class UISTaskController {
     private final RedisCacheManager redisCacheManager;
 
     @GetMapping("/getUISVerificationStatus")
-    public R<FudanUISTaskResultDTO> getTaskStatus(@RequestParam Long userId) {
+    public R<FudanUISTaskResultDTO> getTaskStatus(@RequestParam("userId") Long userId) {
         FudanUISTaskResultDTO result = redisCacheManager.getUisTaskStatus(userId);
 
         if (result == null) {

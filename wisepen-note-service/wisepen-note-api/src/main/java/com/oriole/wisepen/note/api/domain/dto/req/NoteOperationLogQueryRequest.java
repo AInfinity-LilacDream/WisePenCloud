@@ -1,29 +1,24 @@
-package com.oriole.wisepen.note.api.domain.base;
+package com.oriole.wisepen.note.api.domain.dto.req;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.oriole.wisepen.common.core.jackson.TimestampLocalDateTimeDeserializer;
 import com.oriole.wisepen.common.core.jackson.TimestampLocalDateTimeSerializer;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-public class NoteOperationLogBase {
+public class NoteOperationLogQueryRequest implements Serializable {
+    private String resourceId;
     private String userId;
-    private String operationType;
-    private String contentSummary;
     @JsonSerialize(using = TimestampLocalDateTimeSerializer.class)
     @JsonDeserialize(using = TimestampLocalDateTimeDeserializer.class)
-    private LocalDateTime timestamp;
-    /** 合并的原子操作数（颗粒度合并时 >1） */
-    private Integer mergedCount;
-    /** BlockNote 树状突变详情 */
-    private Object details;
+    private LocalDateTime startTime;
+    @JsonSerialize(using = TimestampLocalDateTimeSerializer.class)
+    @JsonDeserialize(using = TimestampLocalDateTimeDeserializer.class)
+    private LocalDateTime endTime;
+    private int page = 1;
+    private int size = 20;
 }

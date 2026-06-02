@@ -3,7 +3,9 @@ package com.oriole.wisepen.note.controller;
 import com.oriole.wisepen.common.core.context.SecurityContextHolder;
 import com.oriole.wisepen.common.core.domain.PageR;
 import com.oriole.wisepen.common.core.domain.R;
+import com.oriole.wisepen.common.core.domain.enums.BusinessType;
 import com.oriole.wisepen.common.core.exception.ServiceException;
+import com.oriole.wisepen.common.log.annotation.Log;
 import com.oriole.wisepen.common.security.annotation.CheckLogin;
 import com.oriole.wisepen.note.api.domain.base.NoteInfoBase;
 import com.oriole.wisepen.note.api.domain.dto.req.NoteCreateRequest;
@@ -44,6 +46,7 @@ public class NoteController {
     private final RemoteUserService remoteUserService;
 
     @Operation(summary = "创建笔记")
+    @Log(title = "创建笔记", businessType = BusinessType.INSERT)
     @PostMapping("/addNote")
     public R<String> createNote(@Validated @RequestBody NoteCreateRequest request) {
         String userId = SecurityContextHolder.getUserId().toString();

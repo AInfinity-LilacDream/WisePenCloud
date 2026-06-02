@@ -1,6 +1,8 @@
 package com.oriole.wisepen.system.service;
 
+import com.oriole.wisepen.common.core.domain.PageR;
 import com.oriole.wisepen.system.api.domain.dto.SysOperLogDTO;
+import com.oriole.wisepen.system.api.domain.dto.SysOperLogQueryDTO;
 
 public interface SysOperLogService {
 
@@ -11,4 +13,6 @@ public interface SysOperLogService {
      * @return 是否成功
      */
     boolean saveLog(SysOperLogDTO dto);
+
+    PageR<SysOperLogDTO> listLogs(SysOperLogQueryDTO query);
 }

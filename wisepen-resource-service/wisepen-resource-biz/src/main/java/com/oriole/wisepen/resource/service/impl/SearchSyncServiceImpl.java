@@ -17,6 +17,8 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +71,7 @@ public class SearchSyncServiceImpl implements ISearchSyncService {
         try {
             Map<String, Object> doc = new HashMap<>();
             doc.put("resourceId", entity.getResourceId());
-            doc.put("updateTime", entity.getUpdateTime());
+            doc.put("updateTime", truncateToMillis(entity.getUpdateTime()));
 
             if (fields.contains(UpsertField.RESOURCE_TYPE)) {
                 doc.put("resourceType", entity.getResourceType());
@@ -98,5 +100,9 @@ public class SearchSyncServiceImpl implements ISearchSyncService {
             log.error("ES upsert failed resourceId={} fields={}", entity.getResourceId(), fields, e);
             throw new ServiceException(ResourceError.RESOURCE_SEARCH_FAILED);
         }
+    }
+
+    private LocalDateTime truncateToMillis(LocalDateTime value) {
+        return value == null ? null : value.truncatedTo(ChronoUnit.MILLIS);
     }
 }

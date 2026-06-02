@@ -6,16 +6,21 @@ import com.oriole.wisepen.common.core.domain.PageR;
 import com.oriole.wisepen.common.core.domain.R;
 import com.oriole.wisepen.common.core.domain.enums.BusinessType;
 import com.oriole.wisepen.common.core.domain.enums.GroupRoleType;
+import com.oriole.wisepen.common.core.domain.enums.IdentityType;
 import com.oriole.wisepen.common.core.domain.enums.list.QueryLogicEnum;
 import com.oriole.wisepen.common.core.domain.enums.list.SortDirectionEnum;
 import com.oriole.wisepen.common.log.annotation.Log;
 import com.oriole.wisepen.common.security.annotation.CheckLogin;
+import com.oriole.wisepen.common.security.annotation.CheckRole;
 import com.oriole.wisepen.resource.constant.ResourceConstants;
-import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateActionPermissionRequest;
-import com.oriole.wisepen.resource.domain.dto.res.ResourceItemResponse;
+import com.oriole.wisepen.resource.domain.dto.req.ResourceOperationLogQueryRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceRenameRequest;
+import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateActionPermissionRequest;
 import com.oriole.wisepen.resource.domain.dto.req.ResourceUpdateTagsRequest;
+import com.oriole.wisepen.resource.domain.dto.res.ResourceItemResponse;
+import com.oriole.wisepen.resource.domain.dto.res.ResourceOperationLogResponse;
 import com.oriole.wisepen.resource.enums.ResourceSortBy;
+import com.oriole.wisepen.resource.service.IResourceOperationLogService;
 import com.oriole.wisepen.resource.service.IResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,6 +39,7 @@ import java.util.List;
 public class ResourceItemController {
 
     private final IResourceService resourceService;
+    private final IResourceOperationLogService resourceOperationLogService;
 
     // 重命名资源
     @Operation(summary = "重命名资源", description = "用户修改资源名称")
@@ -49,7 +55,7 @@ public class ResourceItemController {
     @Operation(summary = "删除资源", description = "用户删除资源")
     @Log(title = "删除资源", businessType = BusinessType.DELETE)
     @PostMapping("/removeResources")
-    public R<Void> deleteResource(@RequestParam List<String> resourceIds) {
+    public R<Void> deleteResource(@RequestParam("resourceIds") List<String> resourceIds) {
         String currentUserId = SecurityContextHolder.getUserId().toString();
         for (String resourceId : resourceIds) {
             resourceService.assertResourceOwner(resourceId, currentUserId);
@@ -99,6 +105,13 @@ public class ResourceItemController {
         resourceService.assertResourceOwner(req.getResourceId(), userId);
         resourceService.updateResourceActionPermission(req);
         return R.ok();
+    }
+
+    @Operation(summary = "分页查询资源操作历史", description = "按资源ID、用户ID、时间范围组合过滤资源操作历史")
+    @CheckRole(IdentityType.ADMIN)
+    @GetMapping("/listResourceOperationLog")
+    public R<PageR<ResourceOperationLogResponse>> listResourceOperationLog(ResourceOperationLogQueryRequest request) {
+        return R.ok(resourceOperationLogService.listResourceOperationLogs(request));
     }
 
     // 列出资源

@@ -5,29 +5,22 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.oriole.wisepen.common.core.jackson.TimestampLocalDateTimeDeserializer;
 import com.oriole.wisepen.common.core.jackson.TimestampLocalDateTimeSerializer;
 import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
-/**
- * 操作日志 DTO
- * 归属于 System 模块对外暴露的契约
- */
 @Data
-public class SysOperLogDTO implements Serializable {
-    private Long id;
-    private String title;
-    private Integer businessType;
-    private String method;
-    private String reqMethod;
+public class SysOperLogQueryDTO implements Serializable {
+    private List<String> operUrls;
     private Long operUserId;
-    private String operUrl;
-    private String operIp;
-    private String operParam;
-    private String jsonResult;
-    private Integer status;
-    private String errorMsg;
     @JsonSerialize(using = TimestampLocalDateTimeSerializer.class)
     @JsonDeserialize(using = TimestampLocalDateTimeDeserializer.class)
-    private LocalDateTime operTime;
-    private Long costTime;
+    private LocalDateTime startTime;
+    @JsonSerialize(using = TimestampLocalDateTimeSerializer.class)
+    @JsonDeserialize(using = TimestampLocalDateTimeDeserializer.class)
+    private LocalDateTime endTime;
+    private Integer status;
+    private int page = 1;
+    private int size = 20;
 }
