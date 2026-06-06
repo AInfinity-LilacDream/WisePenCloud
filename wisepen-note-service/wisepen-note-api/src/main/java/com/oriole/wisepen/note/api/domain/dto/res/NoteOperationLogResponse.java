@@ -8,4 +8,5 @@ import lombok.EqualsAndHashCode;
 @Data
 public class NoteOperationLogResponse extends NoteOperationLogBase {
     private String id;
+    private String resourceId;
 }
