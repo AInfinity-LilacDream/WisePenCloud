@@ -1,8 +1,12 @@
 package com.oriole.wisepen.note.controller;
 
+import com.oriole.wisepen.common.core.domain.PageR;
 import com.oriole.wisepen.common.core.domain.R;
+import com.oriole.wisepen.note.api.domain.dto.req.NoteOperationLogQueryRequest;
+import com.oriole.wisepen.note.api.domain.dto.res.NoteOperationLogResponse;
 import com.oriole.wisepen.note.api.domain.dto.res.NoteSnapshotResponse;
 import com.oriole.wisepen.note.api.feign.RemoteNoteService;
+import com.oriole.wisepen.note.service.INoteOperationLogService;
 import com.oriole.wisepen.note.service.INoteVersionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class InternalNoteController implements RemoteNoteService {
 
     private final INoteVersionService noteVersionService;
+    private final INoteOperationLogService noteOperationLogService;
 
     @Operation(
             summary = "内部获取最新笔记快照",
@@ -33,5 +38,12 @@ public class InternalNoteController implements RemoteNoteService {
     @Override
     public R<NoteSnapshotResponse> getNoteLatestVersion(@RequestParam("resourceId") String resourceId) {
         return R.ok(noteVersionService.getLatestVersion(resourceId));
+    }
+
+    @Operation(summary = "查询笔记操作日志")
+    @PostMapping("/listNoteOperationLogs")
+    @Override
+    public R<PageR<NoteOperationLogResponse>> listNoteOperationLogs(@RequestBody NoteOperationLogQueryRequest request) {
+        return R.ok(noteOperationLogService.listOperationLogs(request));
     }
 }
